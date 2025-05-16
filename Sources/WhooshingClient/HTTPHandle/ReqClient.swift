@@ -36,7 +36,7 @@ open class ReqClient: @unchecked Sendable {
     public func makeChannel(url: WebURI) -> EventLoopFuture<(Channel, RequestHandler, domain: String?)> {
         
         guard [.http, .https].contains(url.scheme) else {
-            return eventLoop.makeFailedFuture(Err.requestFormatError.d("预期请求协议为 http 或 https，但得到 \(url.scheme)", 13052, (#file, #line)))
+            return eventLoop.makeFailedFuture(Err.requestFormatError.d("预期请求协议为 http 或 https，但得到 \(url.scheme)", 13052))
         }
 
         let port: Int
@@ -45,7 +45,7 @@ open class ReqClient: @unchecked Sendable {
             port = url.port ?? (url.scheme == .https ? 443 : 20002)
         } else {
             guard let p = url.port else {
-                return eventLoop.makeFailedFuture(Err.requestFormatError.d("无法获取 Port", 10081, (#file, #line)))
+                return eventLoop.makeFailedFuture(Err.requestFormatError.d("无法获取 Port", 10081))
             }
             port = p
         }
@@ -103,15 +103,16 @@ open class ReqClient: @unchecked Sendable {
         handler.progress = { prog in
             if prog.response {
                 if self.headerPool[id] == nil {
-                    print(String(buffer: prog.data))
-                    self.headerPool[id] = try Guard( { try .init(data: prog.data) }, throw: Err.requestParseFailed.d(14010, #file, #line))
+                    self.headerPool[id] = try Guard( { try .init(data: prog.data) }, throw: Err.requestParseFailed.d(14010))
                 }
                 let header = self.headerPool[id]!
                 try progress(prog.copy(value: header))
+                if prog.done {
+                    self.headerPool[id] = nil
+                }
                 return
             }
             try progress(prog.copy(value: nil))
-            if prog.done { self.headerPool[id] = nil }
         }
         return channel.writeAndFlush(client).flatMapError { err in
             self.logger?.warning("\(err)")
@@ -127,7 +128,6 @@ open class ReqClient: @unchecked Sendable {
     public func closeAll() async {
         for (_, channel) in channelPool {
             try? await channel.close(mode: .all)
-            print("连接关闭")
         }
         channelPool.removeAll()
     }
