@@ -33,7 +33,7 @@ let package = Package(
                 .product(name: "_NIOFileSystem", package: "swift-nio"),
                 .product(name: "NIOFoundationCompat", package: "swift-nio"),
                 .product(name: "Logging", package: "swift-log"),
-                .product(name: "Vapor", package: "whooshing-vapor")
+                .product(name: "Vapor", package: "whooshing-vapor"),
                 .product(name: "AsyncHTTPClient", package: "async-http-client")
             ],
             swiftSettings: swiftSettings
