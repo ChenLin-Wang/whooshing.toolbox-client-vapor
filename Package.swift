@@ -4,7 +4,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "whooshing.toolbox-client",
+    name: "whooshing.toolbox-client-vapor",
     platforms: [
         .macOS(.v10_15),
         .iOS(.v14),
@@ -19,8 +19,9 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-nio-extras.git", from: "1.0.0"),
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.82.1"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
+        .package(url: "https://github.com/SJJC-Team/whooshing-vapor.git", from: "1.0.0"),
         .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.9.0"),
-        .package(url: "https://github.com/apple/swift-async-algorithms", from: "1.0.0")
+        .package(url: "https://github.com/apple/swift-async-algorithms", from: "1.0.0"),
     ],
     targets: [
         .target(
@@ -33,16 +34,24 @@ let package = Package(
                 .product(name: "_NIOFileSystem", package: "swift-nio"),
                 .product(name: "NIOFoundationCompat", package: "swift-nio"),
                 .product(name: "Logging", package: "swift-log"),
+                .product(name: "Vapor", package: "whooshing-vapor"),
                 .product(name: "AsyncHTTPClient", package: "async-http-client"),
                 .product(name: "AsyncAlgorithms", package: "swift-async-algorithms"),
-            ]
+            ],
+            swiftSettings: swiftSettings
         ),
         .testTarget(
             name: "toolbox-client-Tests",
             dependencies: [
+                .product(name: "Vapor", package: "whooshing-vapor"),
+                .product(name: "AsyncAlgorithms", package: "swift-async-algorithms"),
                 .target(name: "WhooshingClient"),
-                .product(name: "AsyncAlgorithms", package: "swift-async-algorithms")
-            ]
+            ],
+            swiftSettings: swiftSettings
         ),
     ]
 )
+
+var swiftSettings: [SwiftSetting] { [
+    .define("WHOOSHING_VAPOR")
+] }
